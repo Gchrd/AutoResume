@@ -4,7 +4,7 @@ AutoResume is a modern, privacy-first CV builder built with Next.js and Tailwind
 
 **Demo:** https://auto-resume-ric.vercel.app/
 
-![AutoResume UI](https://via.placeholder.com/800x400?text=AutoResume+Preview) *(Replace with actual screenshot)*
+
 
 ## Features
 
