@@ -1,13 +1,15 @@
-# AutoResume 📝
+# AutoResume
 
 AutoResume is a modern, privacy-first CV builder built with Next.js and Tailwind CSS. It empowers users to create professional, ATS-friendly resumes instantly without account registration or cloud storage.
 
+**Demo:** https://auto-resume-ric.vercel.app/
+
 ![AutoResume UI](https://via.placeholder.com/800x400?text=AutoResume+Preview) *(Replace with actual screenshot)*
 
-## 🚀 Features
+## Features
 
 - **Real-time Preview**: See your changes instantly as you type in a split-screen editor.
-- **Privacy First**: All data is stored locally in your browser (`localStorage`). No servers, no tracking.
+- **Privacy First**: All data is stored locally in your browser (localStorage). No servers, no tracking.
 - **ATS Friendly**: Generates a clean, single-column layout optimized for Application Tracking Systems.
 - **PDF Export**: Download high-quality A4 PDFs using the browser's native print engine.
 - **Customizable**:
@@ -16,14 +18,14 @@ AutoResume is a modern, privacy-first CV builder built with Next.js and Tailwind
 - **Smart Inputs**: Intelligent fields like the LinkedIn profile input that auto-formats URLs.
 - **Responsive Design**: Works on desktop and mobile (with toggleable preview).
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Framework**: [Next.js 15](https://nextjs.org/) (App Router)
 - **Styling**: [Tailwind CSS](https://tailwindcss.com/)
 - **Icons**: [Lucide React](https://lucide.dev/)
 - **Language**: TypeScript
 
-## 📦 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -49,17 +51,13 @@ AutoResume is a modern, privacy-first CV builder built with Next.js and Tailwind
 
 4.  Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## 📝 Usage
+## Usage
 
 1.  **Edit**: Fill in your details on the left panel (Personal Info, Experience, Education, etc.).
 2.  **Customize**: Use the "Customize" tab to change the accent color.
 3.  **Add Sections**: Need more space? Add "Custom Sections" for anything unique to you.
 4.  **Download**: Click the "Download PDF" button to save your CV.
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
-
-## 📄 License
-
-This project is licensed under the MIT License.
