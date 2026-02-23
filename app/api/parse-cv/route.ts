@@ -1,33 +1,44 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { NextRequest, NextResponse } from 'next/server';
 
-const GEMINI_PROMPT = `You are an expert CV/Resume parser. I will give you a PDF file of a CV/Resume.
+const GEMINI_PROMPT = `You are an expert CV/Resume data extractor. I will give you a PDF file of a CV/Resume.
 
-Your task:
-1. Read the PDF carefully and identify ALL sections/headers in the CV (e.g., "Personal Information", "Experience", "Education", "Skills", "Certifications", etc.)
-2. The section names may vary — they could be in any language (English, Indonesian, etc.) and use different naming conventions. Adapt accordingly.
-3. Extract ALL data from each section into structured rows.
+Your task: Extract EVERY piece of information from this CV into a structured JSON format.
 
-Return ONLY a valid JSON array (no markdown, no code fences, no explanation). Each element must have exactly these keys:
-- "section": The section/header name as it appears in the CV
-- "field": The specific data label (e.g., "Name", "Company", "Role", "Period", "Degree", etc.)
-- "value": The actual data value
+Return ONLY a valid JSON array (no markdown, no code fences, no extra text). Each element must have exactly these 3 keys:
+- "section": The section name (use the original header from the CV)
+- "field": A descriptive label for this data point
+- "value": The actual data
 
-Rules:
-- For sections with multiple entries (e.g., multiple jobs), number them: "Experience #1", "Experience #2", etc.
-- For skills/languages that are just lists, use "field": "Item 1", "Item 2", etc. or keep it as a single comma-separated value
-- Extract EVERYTHING. Do not skip or summarize any data.
-- If a field has bullet points or achievements, combine them into one value separated by " | "
-- Keep the original language of the CV content
+CRITICAL RULES:
+1. ALWAYS extract dates, periods, and durations for EVERY item that has them — jobs, education, certifications, projects, organizations, etc. Use the field name "Period" or "Date" or "Duration" for these.
+2. For sections with multiple entries, number them clearly: "Experience #1", "Experience #2", "Certification #1", "Certification #2", etc.
+3. Within each numbered entry, ALWAYS include these fields in order (if they exist in the CV):
+   - Title/Name/Position
+   - Organization/Company/Institution/Issuer
+   - Period/Date (NEVER skip this)
+   - Location (if present)
+   - Description/Achievements (combine bullet points with " | ")
+4. For certifications specifically: extract the certification name, issuing organization, date/period, and credential ID if present.
+5. For skills: list all skills as a single comma-separated value per category.
+6. For languages: include both the language name and proficiency level.
+7. Extract EVERYTHING. Do not skip, summarize, or omit any data whatsoever.
+8. Keep the original language of the CV content.
 
-Example output format:
+Example format:
 [
   {"section": "Personal Information", "field": "Name", "value": "John Doe"},
   {"section": "Personal Information", "field": "Email", "value": "john@example.com"},
+  {"section": "Personal Information", "field": "Phone", "value": "+1 234 567 890"},
+  {"section": "Personal Information", "field": "Location", "value": "Jakarta, Indonesia"},
+  {"section": "Experience #1", "field": "Position", "value": "Senior Developer"},
   {"section": "Experience #1", "field": "Company", "value": "Tech Corp"},
-  {"section": "Experience #1", "field": "Role", "value": "Senior Developer"},
-  {"section": "Experience #1", "field": "Period", "value": "2023 - Present"},
-  {"section": "Experience #1", "field": "Achievements", "value": "Led team of 5 | Improved performance by 40%"}
+  {"section": "Experience #1", "field": "Period", "value": "Jan 2023 - Present"},
+  {"section": "Experience #1", "field": "Achievements", "value": "Led team of 5 | Improved performance by 40%"},
+  {"section": "Certification #1", "field": "Name", "value": "AWS Solutions Architect"},
+  {"section": "Certification #1", "field": "Issuer", "value": "Amazon Web Services"},
+  {"section": "Certification #1", "field": "Date", "value": "March 2023"},
+  {"section": "Certification #1", "field": "Credential ID", "value": "ABC123"}
 ]`;
 
 export async function POST(request: NextRequest) {

@@ -6,12 +6,25 @@ export interface ParsedCVRow {
 
 export function convertToCSV(data: ParsedCVRow[]): string {
     const header = 'Section,Field,Value';
-    const rows = data.map((row) => {
-        const escape = (val: string) =>
-            `"${val.replace(/"/g, '""')}"`;
-        return `${escape(row.section)},${escape(row.field)},${escape(row.value)}`;
-    });
+    const rows: string[] = [];
+    let lastSection = '';
+
+    for (const row of data) {
+        // Add an empty row between different sections for readability
+        if (row.section !== lastSection && lastSection !== '') {
+            rows.push(',,');
+        }
+        lastSection = row.section;
+
+        rows.push(`${escape(row.section)},${escape(row.field)},${escape(row.value)}`);
+    }
+
     return [header, ...rows].join('\n');
+}
+
+function escape(val: string): string {
+    // Always wrap in quotes and escape internal quotes
+    return `"${val.replace(/"/g, '""')}"`;
 }
 
 export function downloadCSV(csvContent: string, filename: string = 'cv_data.csv') {
