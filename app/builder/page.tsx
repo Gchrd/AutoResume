@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import CVPreview from "@/components/Preview/CVPreview";
+import Link from "next/link";
 import { initialResumeData as initialData, ResumeData } from "@/data/resume";
 import {
     Download,
@@ -15,7 +16,9 @@ import {
     Layers,
     Palette,
     Eye,
-    Edit3
+    Edit3,
+    ArrowLeft,
+    X
 } from "lucide-react";
 
 import PersonalDetailsForm from "@/components/Editor/PersonalDetailsForm";
@@ -104,11 +107,19 @@ export default function BuilderPage() {
     return (
         <div className="min-h-screen bg-gray-100 flex flex-col h-screen overflow-hidden print:h-auto print:overflow-visible">
             {/* Top Bar */}
-            <header className="bg-white border-b px-6 py-3 flex justify-between items-center shadow-sm z-10 print:hidden relative">
-                <h1 className="font-bold text-xl flex items-center gap-2 text-gray-800">
-                    <LayoutTemplate className="w-6 h-6 text-blue-600" />
-                    <span className="hidden sm:inline">CV Builder</span>
-                </h1>
+            <header className="bg-white border-b px-4 md:px-6 py-3 flex justify-between items-center shadow-sm z-10 print:hidden relative">
+                <div className="flex items-center gap-3">
+                    <Link
+                        href="/"
+                        className="text-gray-500 hover:text-gray-800 transition-colors p-1"
+                    >
+                        <ArrowLeft className="w-5 h-5" />
+                    </Link>
+                    <h1 className="font-bold text-lg md:text-xl flex items-center gap-2 text-gray-800">
+                        <LayoutTemplate className="w-5 h-5 md:w-6 h-6 text-blue-600" />
+                        <span className="hidden xs:inline">CV Builder</span>
+                    </h1>
+                </div>
 
                 {/* Mobile View Toggle */}
                 <div className="flex bg-gray-100 rounded-lg p-1 md:hidden">
@@ -137,53 +148,63 @@ export default function BuilderPage() {
             </header>
 
             {/* Main Content */}
-            <main className="flex-1 flex overflow-hidden print:h-auto print:overflow-visible print:block">
+            <main className="flex-1 flex flex-col md:flex-row overflow-hidden print:h-auto print:overflow-visible print:block mt-0">
 
-                {/* Sidebar Navigation */}
-                <aside className={`w-full md:w-64 bg-white border-r flex flex-col overflow-y-auto ${viewMode === 'preview' ? 'hidden md:flex' : 'flex'} print:hidden`}>
-                    <div className="p-4 space-y-1">
+                {/* Navigation: Horizontal Tabs on Mobile, Sidebar on Desktop */}
+                <nav className={`bg-white border-b md:border-b-0 md:border-r flex-shrink-0 z-10 ${viewMode === 'preview' ? 'hidden md:block' : 'block'} print:hidden`}>
+                    <div className="flex md:flex-col overflow-x-auto md:overflow-y-auto no-scrollbar md:w-64 p-2 md:p-4 gap-1">
                         {menuItems.map((item) => (
                             <button
                                 key={item.id}
                                 onClick={() => setActiveTab(item.id)}
-                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${activeTab === item.id
+                                className={`flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-lg text-xs md:text-sm font-medium transition-colors whitespace-nowrap ${activeTab === item.id
                                     ? "bg-blue-50 text-blue-700"
                                     : "text-gray-600 hover:bg-gray-50"
                                     }`}
                             >
-                                <item.icon className={`w-5 h-5 ${activeTab === item.id ? "text-blue-600" : "text-gray-400"}`} />
+                                <item.icon className={`w-4 h-4 md:w-5 h-5 ${activeTab === item.id ? "text-blue-600" : "text-gray-400"}`} />
                                 {item.label}
                             </button>
                         ))}
                     </div>
-                </aside>
+                </nav>
 
                 {/* Editor Area */}
-                <div className={`flex-1 bg-white overflow-y-auto p-6 md:p-8 ${viewMode === 'preview' ? 'hidden md:block' : 'block'} print:hidden scrollbar-thin`}>
+                <div className={`flex-1 bg-white overflow-y-auto p-4 md:p-8 ${viewMode === 'preview' ? 'hidden md:block' : 'block'} print:hidden scrollbar-thin`}>
                     <div className="max-w-2xl mx-auto">
                         {renderActiveForm()}
                     </div>
                 </div>
 
+                {/* Mobile Preview Overlay Toggle Button */}
+                {viewMode === 'editor' && (
+                    <button
+                        onClick={() => setViewMode("preview")}
+                        className="fixed bottom-6 right-6 bg-blue-600 text-white p-4 rounded-full shadow-2xl z-30 md:hidden flex items-center gap-2 font-bold"
+                    >
+                        <Eye className="w-6 h-6" />
+                        Preview
+                    </button>
+                )}
+
                 {/* Live Preview Area */}
                 <div className={`
-            fixed inset-0 z-20 bg-gray-900/50 flex justify-center items-start pt-10
-            md:static md:z-0 md:bg-gray-500 md:w-1/2 lg:w-3/5 md:flex md:items-start md:pt-8 md:justify-center
-            overflow-y-auto
-            ${viewMode === 'preview' ? 'flex' : 'hidden md:flex'}
-            print:static print:w-full print:h-auto print:bg-white print:p-0 print:block print:overflow-visible
-        `}>
+                    fixed inset-0 z-40 bg-gray-900 md:static md:z-0 md:bg-gray-500 md:flex-1 lg:flex-[1.5] md:flex md:items-start md:pt-8 md:justify-center
+                    overflow-y-auto
+                    ${viewMode === 'preview' ? 'flex flex-col items-center pt-16 md:pt-8' : 'hidden md:flex'}
+                    print:static print:w-full print:h-auto print:bg-white print:p-0 print:block print:overflow-visible
+                `}>
                     {/* Close preview button for mobile */}
                     {viewMode === 'preview' && (
                         <button
                             onClick={() => setViewMode("editor")}
-                            className="absolute top-4 right-4 bg-white rounded-full p-2 text-gray-800 shadow-lg md:hidden print:hidden"
+                            className="fixed top-4 right-4 bg-white/20 hover:bg-white/30 backdrop-blur-md rounded-full p-2 text-white shadow-xl md:hidden z-50 transition-all"
                         >
-                            <Eye className="w-6 h-6" />
+                            <X className="w-8 h-8" />
                         </button>
                     )}
 
-                    <div className="bg-white shadow-2xl w-[210mm] min-h-[297mm] transition-transform origin-top scale-50 md:scale-75 lg:scale-90 xl:scale-100 print:scale-100 print:shadow-none mb-10 md:mb-0">
+                    <div className="bg-white shadow-2xl w-[210mm] min-h-[297mm] transition-transform origin-top scale-[0.35] xs:scale-[0.45] sm:scale-[0.6] md:scale-75 lg:scale-90 xl:scale-100 print:scale-100 print:shadow-none mb-20 md:mb-10">
                         <CVPreview data={data} />
                     </div>
                 </div>
