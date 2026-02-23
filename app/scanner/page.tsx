@@ -7,10 +7,13 @@ import { ParsedCVRow, convertToCSV, downloadCSV } from '@/lib/csvUtils';
 
 interface JobMatchResult {
     matchPercentage: number;
+    cosineSimilarity: number;
     summary: string;
     strengths: string[];
     weaknesses: string[];
     suggestions: string[];
+    method: string;
+    methodDescription: string;
 }
 
 export default function ScannerPage() {
@@ -423,6 +426,13 @@ export default function ScannerPage() {
                                                             style={{ width: `${matchResult.matchPercentage}%` }}
                                                         />
                                                     </div>
+                                                </div>
+
+                                                {/* Method Info */}
+                                                <div className="mt-4 inline-flex items-center gap-2 bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full text-xs">
+                                                    <span>Cosine Similarity: {matchResult.cosineSimilarity?.toFixed(4)}</span>
+                                                    <span className="text-gray-300">|</span>
+                                                    <span>Vector Embedding + AI Analysis</span>
                                                 </div>
                                             </div>
 

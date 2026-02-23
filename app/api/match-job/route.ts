@@ -1,47 +1,22 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { NextRequest, NextResponse } from 'next/server';
+import { cosineSimilarity, getEmbedding, cvDataToText } from '@/lib/embeddingUtils';
 
-const MATCH_PROMPT = `You are an expert HR recruiter and career advisor. I will give you:
-1. A person's CV data (structured as JSON)
-2. A job title and job description
+const ANALYSIS_PROMPT = `You are an expert HR recruiter. I will give you:
+1. A candidate's CV data
+2. A job title and description
+3. A similarity score (0-100%) calculated via vector embedding cosine similarity
 
-Your task: Analyze how well the candidate's CV matches the job requirements.
+Your task: Provide qualitative analysis of the match. The similarity score is already computed mathematically — do NOT recalculate it. Instead, focus on explaining WHY the score is what it is.
 
-Return ONLY a valid JSON object (no markdown, no code fences, no extra text) with exactly these keys:
-- "matchPercentage": A number from 0 to 100 representing the overall match
-- "summary": A brief 1-2 sentence overall assessment
-- "strengths": An array of strings listing the candidate's strengths that match the job (max 5 items)
-- "weaknesses": An array of strings listing gaps or missing qualifications (max 5 items)
-- "suggestions": An array of strings with actionable advice to improve the match (max 3 items)
+Return ONLY a valid JSON object (no markdown, no code fences) with these keys:
+- "summary": 1-2 sentence overall assessment referencing the score
+- "strengths": Array of strings (max 5) — specific CV strengths matching the job
+- "weaknesses": Array of strings (max 5) — specific gaps or missing qualifications
+- "suggestions": Array of strings (max 3) — actionable advice to improve the match
 
-Scoring guidelines:
-- 90-100%: Near-perfect match, candidate exceeds most requirements
-- 70-89%: Strong match, meets most key requirements
-- 50-69%: Moderate match, has relevant experience but missing some requirements
-- 30-49%: Weak match, some transferable skills but significant gaps
-- 0-29%: Poor match, very few relevant qualifications
-
-Be honest and specific. Reference actual skills, experiences, and requirements in your analysis.
-Keep the response language matching the job description language (if Indonesian, respond in Indonesian).
-
-Example output:
-{
-  "matchPercentage": 72,
-  "summary": "Strong match for the role. The candidate has solid technical skills in React and Node.js but lacks experience with AWS infrastructure.",
-  "strengths": [
-    "3+ years of React experience matches the requirement",
-    "Has leadership experience managing a team of 5",
-    "Strong communication skills evident from organizational roles"
-  ],
-  "weaknesses": [
-    "No cloud/AWS experience mentioned (required in job description)",
-    "No experience with CI/CD pipelines"
-  ],
-  "suggestions": [
-    "Consider obtaining an AWS Cloud Practitioner certification",
-    "Highlight any DevOps or deployment experience in the CV"
-  ]
-}`;
+Be specific. Reference actual skills, experiences, and job requirements.
+Match the language of the job description (if Indonesian, respond in Indonesian).`;
 
 export async function POST(request: NextRequest) {
     try {
@@ -62,6 +37,24 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        // ===== STEP 1: Mathematical Similarity via Vector Embeddings =====
+        // Convert CV data to flat text for embedding
+        const cvText = cvDataToText(cvData);
+        const jobText = `${jobTitle}\n\n${jobDescription}`;
+
+        // Get embedding vectors from Gemini Embedding API
+        const [cvEmbedding, jobEmbedding] = await Promise.all([
+            getEmbedding(apiKey, cvText),
+            getEmbedding(apiKey, jobText),
+        ]);
+
+        // Calculate cosine similarity (returns -1 to 1, we convert to 0-100%)
+        const rawSimilarity = cosineSimilarity(cvEmbedding, jobEmbedding);
+        // Scale from cosine range [0, 1] to percentage [0, 100]
+        // Typical text cosine similarities range 0.3-0.9, so we normalize
+        const matchPercentage = Math.round(Math.min(100, Math.max(0, rawSimilarity * 100)));
+
+        // ===== STEP 2: Qualitative Analysis via Generative AI =====
         const genAI = new GoogleGenerativeAI(apiKey);
         const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
@@ -73,31 +66,46 @@ JOB TITLE: ${jobTitle}
 
 JOB DESCRIPTION:
 ${jobDescription}
+
+COMPUTED SIMILARITY SCORE: ${matchPercentage}%
+(This score was calculated using cosine similarity between the CV embedding vector and the job description embedding vector. Do not change this number.)
 `;
 
         const result = await model.generateContent([
-            { text: MATCH_PROMPT },
+            { text: ANALYSIS_PROMPT },
             { text: userMessage },
         ]);
 
         const response = result.response;
         const responseText = response.text();
 
-        let parsed;
+        let analysis;
         try {
             const cleaned = responseText
                 .replace(/```json\n?/g, '')
                 .replace(/```\n?/g, '')
                 .trim();
-            parsed = JSON.parse(cleaned);
+            analysis = JSON.parse(cleaned);
         } catch {
             return NextResponse.json(
-                { error: 'Failed to parse AI response', raw: responseText },
+                { error: 'Failed to parse AI analysis', raw: responseText },
                 { status: 500 }
             );
         }
 
-        return NextResponse.json({ data: parsed });
+        // Combine mathematical score with AI analysis
+        return NextResponse.json({
+            data: {
+                matchPercentage,
+                cosineSimilarity: rawSimilarity,
+                summary: analysis.summary,
+                strengths: analysis.strengths || [],
+                weaknesses: analysis.weaknesses || [],
+                suggestions: analysis.suggestions || [],
+                method: 'hybrid',
+                methodDescription: 'Score calculated via cosine similarity of Gemini text-embedding-004 vectors. Analysis provided by Gemini 2.5 Flash.',
+            },
+        });
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : 'Unknown error';
         console.error('Job Match Error:', message);
