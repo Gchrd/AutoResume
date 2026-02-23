@@ -30,7 +30,7 @@ export function cosineSimilarity(a: number[], b: number[]): number {
  */
 export async function getEmbedding(apiKey: string, text: string): Promise<number[]> {
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'text-embedding-004' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-embedding-001' });
 
     const result = await model.embedContent(text);
     return result.embedding.values;

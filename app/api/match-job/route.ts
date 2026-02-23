@@ -103,7 +103,7 @@ COMPUTED SIMILARITY SCORE: ${matchPercentage}%
                 weaknesses: analysis.weaknesses || [],
                 suggestions: analysis.suggestions || [],
                 method: 'hybrid',
-                methodDescription: 'Score calculated via cosine similarity of Gemini text-embedding-004 vectors. Analysis provided by Gemini 2.5 Flash.',
+                methodDescription: 'Score calculated via cosine similarity of Gemini gemini-embedding-001 vectors. Analysis provided by Gemini 2.5 Flash.',
             },
         });
     } catch (error: unknown) {

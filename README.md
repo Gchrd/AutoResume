@@ -23,6 +23,12 @@ AutoResume is a modern, privacy-first CV builder built with Next.js and Tailwind
 - **Adaptive Section Detection**: Automatically detects section headers in any language or format.
 - **CSV Export**: Download the extracted data as a structured CSV file, ready for use in Excel or Google Sheets.
 
+### Job Match (Hybrid AI)
+- **Vector Embedding**: Uses Gemini text-embedding-001 to convert CVs and job descriptions into high-dimensional vectors.
+- **Mathematical Scoring**: Calculates the Cosine Similarity between vectors for a precise, objective match score.
+- **Qualitative Analysis**: Gemini 2.5 Flash provides a detailed breakdown of strengths, gaps, and improvement suggestions based on the objective score.
+- **Technical Transparency**: Shows the exact Cosine Similarity value to verify the mathematical origin of the score.
+
 ## Tech Stack
 
 - **Framework**: [Next.js](https://nextjs.org/) (App Router)
@@ -71,14 +77,17 @@ AutoResume is a modern, privacy-first CV builder built with Next.js and Tailwind
 3.  Need more space? Add "Custom Sections" for anything unique to you.
 4.  Click the "Download PDF" button to save your CV.
 
-### Scanning a CV
+### Scanning & Matching a CV
 1.  Click "Scan Existing CV" on the homepage or navigate to `/scanner`.
 2.  Upload a PDF file of any CV/Resume.
 3.  Click "Scan CV" and wait for the AI to process it (5-10 seconds).
 4.  Review the extracted data in the table.
-5.  Click "Download CSV" to export the data.
+5.  Need to check match with a job? Click the purple "Check Job Match" button.
+6.  Paste the target Job Title and Job Description.
+7.  Click "Analyze Match" to get a detailed hybrid vector-mathematical and AI-rational analysis.
+8.  Download the CSV if needed.
 
-Note: Only PDF format is supported for scanning. The Gemini API key is required for this feature.
+Note: Only PDF format is supported for scanning. The Gemini API key is required for these features.
 
 ## Contributing
 
