@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { FileText, ArrowRight, Check, Star } from 'lucide-react';
+import { FileText, ArrowRight, Check, Star, ScanSearch } from 'lucide-react';
 
 export default function WelcomePage() {
   return (
@@ -13,9 +13,14 @@ export default function WelcomePage() {
             </div>
             AutoResume
           </div>
-          <Link href="/builder" className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">
-            Go to Builder
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link href="/scanner" className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">
+              CV Scanner
+            </Link>
+            <Link href="/builder" className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">
+              Go to Builder
+            </Link>
+          </div>
         </div>
       </nav>
 
@@ -45,12 +50,13 @@ export default function WelcomePage() {
               Start Building Now
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
-            <a
-              href="#how-it-works"
-              className="px-8 py-4 rounded-full font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+            <Link
+              href="/scanner"
+              className="group px-8 py-4 rounded-full font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors border border-gray-200 flex items-center gap-2"
             >
-              How it works
-            </a>
+              <ScanSearch className="w-5 h-5" />
+              Scan Existing CV
+            </Link>
           </div>
         </div>
       </div>
